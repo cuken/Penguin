@@ -13,6 +13,21 @@ namespace Penguin
         [DllImport("user32.dll", ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr GetForegroundWindow();
 
+        [DllImport("user32.dll")]
+        public static extern void SwitchToThisWindow(IntPtr hWnd, bool turnon);
+
+        //now we have switch window.
+        public static void SwitchWindow(string ProcWindow)
+        {
+            Process[] procs = Process.GetProcessesByName(ProcWindow);
+            foreach (Process proc in procs)
+            {
+                //switch to process by name
+                SwitchToThisWindow(proc.MainWindowHandle, false);
+
+            }
+        }
+
         public static string GetWindowTitle()
         {
             IntPtr activeWindow = GetForegroundWindow();

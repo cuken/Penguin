@@ -32,7 +32,7 @@ namespace Penguin
     /// <summary>
     /// Class that streamlines changing colors in the console.
     /// </summary>
-    public static class Colors
+    public static class BC
     {
         /// <summary>
         /// Writes text to the console with the specified ConsoleColor. Returns to the previous color when complete.
@@ -1163,7 +1163,7 @@ namespace Penguin
     /// <summary>
     /// A Class with shortcuts for tedious Console.Write and Console.WriteLine commands
     /// </summary>
-    public static class CSC
+    public static class SC
     {
         /// <summary>
         /// Creates X number of blank lines.
