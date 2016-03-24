@@ -38,6 +38,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -54,6 +55,7 @@
     <Compile Include="Classes\ConsoleSpinner.cs" />
     <Compile Include="Classes\Hotkey Manager.cs" />
     <Compile Include="Classes\Mouse.cs" />
+    <Compile Include="Classes\ScreenGrab.cs" />
     <Compile Include="Classes\Window.cs" />
     <Compile Include="Penguin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

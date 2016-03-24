@@ -24,7 +24,6 @@ namespace Penguin
             {
                 //switch to process by name
                 SwitchToThisWindow(proc.MainWindowHandle, false);
-
             }
         }
 
