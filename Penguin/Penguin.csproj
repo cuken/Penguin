@@ -35,6 +35,10 @@
     <Reference Include="Interceptor">
       <HintPath>..\Interceptor.dll</HintPath>
     </Reference>
+    <Reference Include="Spinnerino, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Spinnerino.1.0.2\lib\NET45\Spinnerino.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -48,17 +52,17 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\AutoFish.cs" />
-    <Compile Include="Classes\PerfectCatch.cs" />
-    <Compile Include="Classes\PrettyConsole.cs" />
-    <Compile Include="Classes\ConsoleSpinner.cs" />
-    <Compile Include="Classes\ScreenGrab.cs" />
-    <Compile Include="Classes\Window.cs" />
+    <Compile Include="AutoFish.cs" />
+    <Compile Include="HelperClasses\Ascii.cs" />
+    <Compile Include="HelperClasses\PrettyConsole.cs" />
+    <Compile Include="HelperClasses\ScreenGrab.cs" />
+    <Compile Include="HelperClasses\Window.cs" />
     <Compile Include="Penguin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
