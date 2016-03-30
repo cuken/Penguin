@@ -7,13 +7,14 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Spinnerino;
 using Penguin.HelperClasses;
+using System.Drawing;
 
 namespace Penguin
 {
     public class Penguin
     {
         static Penguin p;
-        AutoFish fish = new AutoFish();
+        //AutoFish fish = new AutoFish();
 
         static bool exitSystem = false;
 
@@ -99,9 +100,9 @@ namespace Penguin
                             break;
                         case "start":
                         case "go":
-                        case "begin":
-                            fish.Start();
-                            break;
+                        //case "begin":
+                        //    fish.Start();
+                        //    break;
                         case "test":
                             test();
                             break;
@@ -116,15 +117,69 @@ namespace Penguin
             }
         }
 
+        [DllImport("gdi32.dll")]
+        private static extern int BitBlt(IntPtr srchDC, int srcX, int srcY, int srcW, int srcH, IntPtr desthDC, int destX, int destY, int op);
+
         private void test()
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            //ScreenGrab.GetPixelColor(500, 500);
-            //ScreenGrab.GetPixelColor(500, 500);
-            //ScreenGrab.GetPixelColor(500, 500);
-            ScreenGrab.GetScreen(500, 500, 20, 20);
-            watch.Stop();
-            Console.WriteLine(watch.ElapsedMilliseconds);
+            runTests();
         }
-    }
+
+        private void runTests()
+        {
+            IntPtr hWnd = IntPtr.Zero;
+            foreach (Process pList in Process.GetProcesses())
+            {
+                if (pList.MainWindowTitle.Contains("notepad"))
+                {
+                    hWnd = pList.MainWindowHandle;
+                }
+            }
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            long result1 = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                watch.Start();
+                ScreenGrab.GDI(hWnd, 500, 500);
+                ScreenGrab.GDI(hWnd, 500, 500);
+                ScreenGrab.GDI(hWnd, 500, 500);
+                watch.Stop();
+                result1 += watch.ElapsedMilliseconds;
+                watch.Reset();
+            }
+
+            result1 = result1 / 1000;
+
+            long result2 = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                watch.Start();
+                ScreenGrab.GetPixelColor(500, 500);
+                ScreenGrab.GetPixelColor(500, 500);
+                ScreenGrab.GetPixelColor(500, 500);
+                watch.Stop();
+                result2 += watch.ElapsedMilliseconds;
+                watch.Reset();
+            }
+
+            result2 = result2 / 1000;
+
+            long result3 = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                watch.Start();
+                ScreenGrab.GetScreen(500, 500, 1, 1);
+                ScreenGrab.GetScreen(500, 500, 1, 1);
+                ScreenGrab.GetScreen(500, 500, 1, 1);
+                watch.Stop();
+                result3 += watch.ElapsedMilliseconds;
+                watch.Reset();
+            }
+
+            result3 = result3 / 1000;
+
+            Console.WriteLine($"T1:{result1}\nT2:{result2}\nT3:{result3}");
+
+        }
+    }    
 }

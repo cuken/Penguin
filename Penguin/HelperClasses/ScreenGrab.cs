@@ -8,34 +8,25 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 namespace Penguin.HelperClasses
-{
-    internal class NativeMethods
-    {
-
-        [DllImport("user32.dll")]
-        public extern static IntPtr GetDesktopWindow();
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetWindowDC(IntPtr hwnd);
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern IntPtr GetForegroundWindow();
-        [DllImport("gdi32.dll")]
-        public static extern UInt64 BitBlt(IntPtr hDestDC, int x, int y,
-           int nWidth, int nHeight, IntPtr hSrcDC,
-           int xSrc, int ySrc, System.Int32 dwRop);
-
-    }
+{ 
 
     static class ScreenGrab
     {
 
         [DllImport("user32.dll")]
         static extern IntPtr GetDC(IntPtr hwnd);
-
         [DllImport("user32.dll")]
         static extern Int32 ReleaseDC(IntPtr hwnd, IntPtr hdc);
-
         [DllImport("gdi32.dll")]
         static extern uint GetPixel(IntPtr hdc, int nXPos, int nYPos);
+        [DllImport("user32.dll")]
+        extern static IntPtr GetDesktopWindow();
+        [DllImport("user32.dll")]
+        static extern IntPtr GetWindowDC(IntPtr hwnd);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern IntPtr GetForegroundWindow();
+        [DllImport("gdi32.dll")]
+        private static extern int BitBlt(IntPtr srchDC, int srcX, int srcY, int srcW, int srcH, IntPtr desthDC, int destX, int destY, int op);
 
         static public System.Drawing.Color GetPixelColor(int x, int y)
         {
@@ -46,6 +37,26 @@ namespace Penguin.HelperClasses
                          (int)(pixel & 0x0000FF00) >> 8,
                          (int)(pixel & 0x00FF0000) >> 16);
             return color;
+        }
+
+        public static Color GDI(IntPtr hWnd,int x, int y)
+        {
+            Bitmap screenPixel = new Bitmap(1, 1);
+            using (Graphics gdest = Graphics.FromImage(screenPixel))
+            {
+                using (Graphics gsrc = Graphics.FromHwnd(hWnd))
+                {
+                    IntPtr hSrcDC = gsrc.GetHdc();
+                    IntPtr hDC = gdest.GetHdc();
+                    int retval = BitBlt(hDC, 0, 0, 1, 1, hSrcDC, x, y, (int)CopyPixelOperation.SourceCopy);
+                    gdest.ReleaseHdc();
+                    gsrc.ReleaseHdc();
+
+                }
+            }
+
+            Color c = screenPixel.GetPixel(0, 0);
+            return c;
         }
 
         public static MemoryStream GetScreen(double x, double y, double width, double height)
@@ -112,8 +123,8 @@ namespace Penguin.HelperClasses
                 Bitmap myImage = new Bitmap(iw, ih);
                 Graphics gr1 = Graphics.FromImage(myImage);
                 IntPtr dc1 = gr1.GetHdc();
-                IntPtr dc2 = NativeMethods.GetWindowDC(NativeMethods.GetForegroundWindow());
-                NativeMethods.BitBlt(dc1, ix, iy, iw, ih, dc2, ix, iy, 13369376);
+                IntPtr dc2 = GetWindowDC(GetForegroundWindow());
+                BitBlt(dc1, ix, iy, iw, ih, dc2, ix, iy, 13369376);
                 gr1.ReleaseHdc(dc1);
                 myImage.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
             }
