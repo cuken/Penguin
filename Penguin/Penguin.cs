@@ -102,12 +102,29 @@ namespace Penguin
                         case "begin":
                             fish.Start();
                             break;
+                        case "test":
+                            test();
+                            break;
                         default:
                             break;
                     }
                 }
-                catch { }
+                catch(Exception ex)
+                {
+                    BC.RedLine(ex.Message);
+                }
             }
-        }        
+        }
+
+        private void test()
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            //ScreenGrab.GetPixelColor(500, 500);
+            //ScreenGrab.GetPixelColor(500, 500);
+            //ScreenGrab.GetPixelColor(500, 500);
+            ScreenGrab.GetScreen(500, 500, 20, 20);
+            watch.Stop();
+            Console.WriteLine(watch.ElapsedMilliseconds);
+        }
     }
 }
