@@ -115,7 +115,6 @@ namespace Penguin
                     BC.RedLine(ex.Message);
                 }
             }
-
         }
         private void test()
         {
@@ -168,7 +167,7 @@ namespace Penguin
             return true;
         }
         private bool CheckCatch(Color c)
-         {
+        {
             if (c.B > c.R + 30 && c.B > c.G)
             {
                 return true;
@@ -179,5 +178,5 @@ namespace Penguin
                 return false;
             }
         }
-    }
+    }    
 }
