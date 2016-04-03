@@ -20,6 +20,7 @@ namespace Penguin
         int fishCaught = 0;
         string action = "Waiting to begin";
         System.Timers.Timer t1 = new System.Timers.Timer();
+        bool perfectCatch = true;
 
         #region FishingVariables
 
@@ -114,97 +115,174 @@ namespace Penguin
                       
             while(running)
             {
-                
+
+
+                //Cast the Fishing Line;
+
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 action = "Casting";
-                //Cast the Fishing Line;
                 input.SendKey(Keys.Space);
-                Thread.Sleep(5000);
+                Thread.Sleep(2500);
+
+                //Wait for the fish to bite
                 Console.ForegroundColor = ConsoleColor.Gray;
                 action = "Waiting for bite";
-                Thread.Sleep(30000);
-                //Wait for Catch To Appear (You can do this by Time or by Pixel Recognition)
-                Color c = new Color();
-                while (!((c.R < catchIconR + catchLeeway) && (c.R > catchIconR - catchLeeway)) &&
-                       !((c.G < catchIconG + catchLeeway) && (c.G > catchIconG - catchLeeway)) && 
-                       !((c.B < catchIconB + catchLeeway) && (c.B > catchIconB - catchLeeway)))
-                {
-                    c = ScreenGrab.GetPixelColor(catchIconX, catchIconY);
-                    action = $"Expecting:{catchIconR},{catchIconG},{catchIconB} Returning:{c.R},{c.G},{c.B}";
-                    Thread.Sleep(50);
-                }
-                //Trigger occured Wait before sending Catch Command
-                input.SendKey(Keys.Space);
-                Console.WriteLine($"\n\nR:{c.R},G:{c.G},B:{c.B}");
+                Thread.Sleep(15000);
 
+                while(!WaitForBite())
+                {
+                    Thread.Sleep(10);
+                }
+
+                //Bite Detected, hit Space to start catch
+                input.SendKey(Keys.Space);
+
+                //Wait for Catch minigame bar to appear
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 action = "Catching";
 
-                //Color b1 = ScreenGrab.GetPixelColor(1088, 406);
-                
-                Color b3 = ScreenGrab.GetPixelColor(1023, 415);              
-                
-                
-                //Color b3 = ScreenGrab.GetPixelColor(1088, 423);
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-                while (!CheckBar(b3))
+                while(!WaitForCatchBar())
                 {
-                    //"B1-R:{b1.R},G:{b1.G},B:{b1.B}|B2-{b2.R},G:{b2.G},B:{b2.B}|
-                    //action = $"B3-{b3.R},G:{b3.G},B:{b3.B}";
-                    //b1 = ScreenGrab.GetPixelColor(1088, 406);
-                    //b2 = ScreenGrab.GetPixelColor(1088, 415);                    
-                    b3 = ScreenGrab.GetPixelColor(1088, 423);
-                    watch.Stop();
-                    action = watch.ElapsedMilliseconds.ToString();
-                    watch.Reset();
-                    watch.Start();
+                    Thread.Sleep(10);
                 }
 
-                //Console.WriteLine($"\n\n\nR:{b1.R},G:{b1.G},B:{b1.B}");
-                //Console.WriteLine($"\n\n\n\nR:{b2.R},G:{b2.G},B:{b2.B}");
-                //Console.WriteLine($"\n\n\n\n\nR:{b3.R},G:{b3.G},B:{b3.B}");                
+                //Bar Found!
+                //Conditional logic of perfect catch versus non?
 
-                //Wait for bar to be completely full
-                //Thread.Sleep(catchTime);
-
-                //Perfect catch the fish?!
+                if(perfectCatch)
+                {
+                    //Attempt to catch the fish "perfectly"
+                    while (!PerfectCatch())
+                    {
+                        Thread.Sleep(10);
+                    }
+                }
+                else
+                {
+                    //Catch the fish in the blue, play fish minigame
+                    while (!RegularCatch())
+                    {
+                        Thread.Sleep(10);
+                    }
+                }
                 input.SendKey(Keys.Space);
 
+                //Record the fish Catch
                 Console.ForegroundColor = ConsoleColor.Green;
                 action = "Caught!";
                 fishCaught++;
+
                 //Wait for the loot dialog to come up
-                Thread.Sleep(1050);
-
+                Thread.Sleep(3000);
                 action = "Looting";
+                Loot();
 
-                //Stop Input until we fix this later.
-                Console.ReadKey();
-
+                //Wait to recast
+                Thread.Sleep(1000);               
             }
 
         }
 
-        private bool CheckBar(Color b3)
+        private bool PerfectCatch()
         {
-            bool result = false;
-            int fuzzyness = 2;
-
-            //if(b1.B > 130 && Math.Abs(b1.R - b1.B) > fuzzyness && Math.Abs(b1.G - b1.B) > fuzzyness)
-            //{
-            //    result =  true;
-            //}
-            //else if (b2.B > 130 && Math.Abs(b2.R - b2.B) > fuzzyness && Math.Abs(b2.G - b2.B) > fuzzyness)
-            //{
-            //    result = true;
-            //}
-            if (b3.B > 130 && Math.Abs(b3.R - b3.B) > fuzzyness && Math.Abs(b3.G - b3.B) > fuzzyness)
+            Color c1 = ScreenGrab.GetPixelColor(1050, 411);
+            while (CheckCatch(c1) != true)
             {
-                result = true;
+                c1 = ScreenGrab.GetPixelColor(1050, 411);
             }
-
-            return result;
+            return true;
         }
+
+        private bool RegularCatch()
+        {
+            Color c1 = ScreenGrab.GetPixelColor(1017, 404);
+            while(CheckCatch(c1) != true)
+            {
+                c1 = ScreenGrab.GetPixelColor(1017, 404);
+            }
+            return true;
+        }
+
+        private bool WaitForBite()
+        {            
+            Color c = new Color();
+            while (!((c.R < catchIconR + catchLeeway) && (c.R > catchIconR - catchLeeway)) &&
+                   !((c.G < catchIconG + catchLeeway) && (c.G > catchIconG - catchLeeway)) &&
+                   !((c.B < catchIconB + catchLeeway) && (c.B > catchIconB - catchLeeway)))
+            {
+                c = ScreenGrab.GetPixelColor(catchIconX, catchIconY);
+                //action = $"Expecting:{catchIconR},{catchIconG},{catchIconB} Returning:{c.R},{c.G},{c.B}";
+                Thread.Sleep(50);
+            }
+            return true;
+        }
+
+        private bool WaitForCatchBar()
+        {
+            Color c1 = ScreenGrab.GetPixelColor(1017, 404);
+            Color c2 = ScreenGrab.GetPixelColor(1077, 404);
+            Color c3 = ScreenGrab.GetPixelColor(1024, 425);
+
+            while(CheckBar(c1) != true || CheckBar(c2) != true || CheckBar(c3) != true)
+            {
+                c1 = ScreenGrab.GetPixelColor(1017, 404);
+                c2 = ScreenGrab.GetPixelColor(1077, 404);
+                c3 = ScreenGrab.GetPixelColor(1024, 425);
+                Thread.Sleep(10);
+            }
+            return true;
+        }
+        
+        private void Loot()
+        {
+            //Add in logic later to determine the quality of the catch. For now, loot everything.
+            input.SendKey(Keys.R);
+        }
+
+        private bool CheckBar(Color c)
+        {
+            if(c.R > 200 && c.G > 200 && c.B > 200)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }            
+        }
+
+        private bool CheckCatch(Color c)
+        {
+            if(c.B > c.R + 50 && c.B > c.G)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //private bool CheckBar(Color c)
+        //{
+        //    bool result = false;
+        //    int fuzzyness = 2;
+
+        //    //if(b1.B > 130 && Math.Abs(b1.R - b1.B) > fuzzyness && Math.Abs(b1.G - b1.B) > fuzzyness)
+        //    //{
+        //    //    result =  true;
+        //    //}
+        //    //else if (b2.B > 130 && Math.Abs(b2.R - b2.B) > fuzzyness && Math.Abs(b2.G - b2.B) > fuzzyness)
+        //    //{
+        //    //    result = true;
+        //    //}
+        //    if (c.B > 130 && Math.Abs(c.R - c.B) > fuzzyness && Math.Abs(c.G - c.B) > fuzzyness)
+        //    {
+        //        result = true;
+        //    }
+
+        //    return result;
+        //}
 
         private void Test()
         {

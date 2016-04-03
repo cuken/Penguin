@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Spinnerino;
 using Penguin.HelperClasses;
+using System.Drawing;
 
 namespace Penguin
 {
@@ -114,17 +115,69 @@ namespace Penguin
                     BC.RedLine(ex.Message);
                 }
             }
-        }
 
+        }
         private void test()
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            //ScreenGrab.GetPixelColor(500, 500);
-            //ScreenGrab.GetPixelColor(500, 500);
-            //ScreenGrab.GetPixelColor(500, 500);
-            ScreenGrab.GetScreen(500, 500, 20, 20);
-            watch.Stop();
-            Console.WriteLine(watch.ElapsedMilliseconds);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Color c1 = ScreenGrab.GetPixelColor(1017, 404);
+            Color c2 = ScreenGrab.GetPixelColor(1077, 404);
+            Color c3 = ScreenGrab.GetPixelColor(1024, 425);
+
+            while (CheckBar(c1) != true || CheckBar(c2) != true || CheckBar(c3) != true)
+            {
+                c1 = ScreenGrab.GetPixelColor(1017, 404);
+                c2 = ScreenGrab.GetPixelColor(1077, 404);
+                c3 = ScreenGrab.GetPixelColor(1024, 425);
+                Thread.Sleep(10);
+            }
+            sw.Stop();
+            BC.GreenLine("Found it!");
+            Console.WriteLine(sw.ElapsedMilliseconds);
+
+            while (!PerfectCatch())
+            {
+                Thread.Sleep(10);
+            }
+
+            Console.WriteLine("HIT THE BUTTON!");
+        }
+
+        private bool CheckBar(Color c)
+        {
+            if (c.R > 200 && c.G > 200 && c.B > 200)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private bool PerfectCatch()
+        {
+            Color c1 = ScreenGrab.GetPixelColor(1080, 411);
+            //Color c2 = ScreenGrab.GetPixelColor(1017, 404);
+            //while (CheckCatch(c1) != true || CheckCatch(c2) != true)
+            while (CheckCatch(c1) != true)
+            {
+                c1 = ScreenGrab.GetPixelColor(1080, 411);
+                //c2 = ScreenGrab.GetPixelColor(1017, 404);
+            }
+            return true;
+        }
+        private bool CheckCatch(Color c)
+         {
+            if (c.B > c.R + 30 && c.B > c.G)
+            {
+                return true;
+            }
+            else
+            {
+                Console.WriteLine(c.R + "," + c.G + "," + c.B);
+                return false;
+            }
         }
     }
 }

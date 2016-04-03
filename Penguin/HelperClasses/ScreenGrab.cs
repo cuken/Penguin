@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Drawing.Imaging;
 
 namespace Penguin.HelperClasses
 {
@@ -46,6 +47,14 @@ namespace Penguin.HelperClasses
                          (int)(pixel & 0x0000FF00) >> 8,
                          (int)(pixel & 0x00FF0000) >> 16);
             return color;
+        }
+
+        static public uint GetPixelColorJosh(int x, int y)
+        {
+            IntPtr hdc = GetDC(IntPtr.Zero);
+            uint pixel = GetPixel(hdc, x, y);
+            ReleaseDC(IntPtr.Zero, hdc);            
+            return pixel;
         }
 
         public static MemoryStream GetScreen(double x, double y, double width, double height)
@@ -118,6 +127,6 @@ namespace Penguin.HelperClasses
                 myImage.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
             }
             catch { }
-        }
+        }        
     }
 }
