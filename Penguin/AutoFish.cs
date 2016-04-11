@@ -23,7 +23,6 @@ namespace Penguin
         bool perfectCatch = true;
 
         #region FishingVariables
-
         int catchLeeway = 2;
 
         int catchIconX = 1065;
@@ -141,31 +140,11 @@ namespace Penguin
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 action = "Catching";
 
-                while(!WaitForCatchBar())
-                {
-                    Thread.Sleep(10);
-                }
+                Thread.Sleep(1550);
 
-                //Bar Found!
-                //Conditional logic of perfect catch versus non?
-
-                if(perfectCatch)
-                {
-                    //Attempt to catch the fish "perfectly"
-                    while (!PerfectCatch())
-                    {
-                        Thread.Sleep(10);
-                    }
-                }
-                else
-                {
-                    //Catch the fish in the blue, play fish minigame
-                    while (!RegularCatch())
-                    {
-                        Thread.Sleep(10);
-                    }
-                }
                 input.SendKey(Keys.Space);
+
+                //Start OCR
 
                 //Record the fish Catch
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -173,12 +152,41 @@ namespace Penguin
                 fishCaught++;
 
                 //Wait for the loot dialog to come up
-                Thread.Sleep(3000);
+                Thread.Sleep(GlobalSettings.lootDealy);
                 action = "Looting";
                 Loot();
 
                 //Wait to recast
-                Thread.Sleep(1000);               
+                Thread.Sleep(1000);
+
+
+                //while(!WaitForCatchBar())
+                //{
+                //    Thread.Sleep(10);
+                //}
+
+                //Bar Found!
+                //Conditional logic of perfect catch versus non?
+
+                //if(perfectCatch)
+                //{
+                //    //Attempt to catch the fish "perfectly"
+                //    while (!PerfectCatch())
+                //    {
+                //        Thread.Sleep(10);
+                //    }
+                //}
+                //else
+                //{
+                //    //Catch the fish in the blue, play fish minigame
+                //    while (!RegularCatch())
+                //    {
+                //        Thread.Sleep(10);
+                //    }
+                //}
+                //input.SendKey(Keys.Space);
+
+
             }
 
         }
@@ -206,9 +214,9 @@ namespace Penguin
         private bool WaitForBite()
         {            
             Color c = new Color();
-            while (!((c.R < catchIconR + catchLeeway) && (c.R > catchIconR - catchLeeway)) &&
-                   !((c.G < catchIconG + catchLeeway) && (c.G > catchIconG - catchLeeway)) &&
-                   !((c.B < catchIconB + catchLeeway) && (c.B > catchIconB - catchLeeway)))
+            while (!((c.R < GlobalSettings.catchIcon_R + GlobalSettings.catchIcon_Fuzzy) && (c.R > GlobalSettings.catchIcon_R - GlobalSettings.catchIcon_Fuzzy)) &&
+                   !((c.G < GlobalSettings.catchIcon_G + GlobalSettings.catchIcon_Fuzzy) && (c.G > GlobalSettings.catchIcon_G - GlobalSettings.catchIcon_Fuzzy)) &&
+                   !((c.B < GlobalSettings.catchIcon_B + GlobalSettings.catchIcon_Fuzzy) && (c.B > GlobalSettings.catchIcon_B - GlobalSettings.catchIcon_Fuzzy)))
             {
                 c = ScreenGrab.GetPixelColor(catchIconX, catchIconY);
                 //action = $"Expecting:{catchIconR},{catchIconG},{catchIconB} Returning:{c.R},{c.G},{c.B}";
@@ -217,6 +225,7 @@ namespace Penguin
             return true;
         }
 
+        /*Legacy
         private bool WaitForCatchBar()
         {
             Color c1 = ScreenGrab.GetPixelColor(1017, 404);
@@ -232,7 +241,8 @@ namespace Penguin
             }
             return true;
         }
-        
+        */
+
         private void Loot()
         {
             //Add in logic later to determine the quality of the catch. For now, loot everything.

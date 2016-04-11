@@ -8,13 +8,16 @@ using System.Runtime.InteropServices;
 using Spinnerino;
 using Penguin.HelperClasses;
 using System.Drawing;
+using Newtonsoft.Json;
 
 namespace Penguin
 {
     public class Penguin
     {
-        static Penguin p;
+        public static Penguin p;
+        public static GlobalSettings settings;
         AutoFish fish = new AutoFish();
+        
 
         static bool exitSystem = false;
 
@@ -75,6 +78,11 @@ namespace Penguin
             SC.WriteCenter("Version 0.0.1 Alpha");
             SC.BlankLines(3);
             Console.ForegroundColor = ConsoleColor.Green;
+
+            if (File.Exists("settings.json"))
+                settings = JsonConvert.DeserializeObject<GlobalSettings>(File.ReadAllText("settings.json"));
+            else
+                settings = new GlobalSettings();
             Menu();
         }
 
