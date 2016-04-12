@@ -9,6 +9,12 @@ using Spinnerino;
 using Penguin.HelperClasses;
 using System.Drawing;
 using Newtonsoft.Json;
+using System.Drawing.Imaging;
+using ColorMine;
+using Penguin.ImageProcessing;
+using ColorMine.ColorSpaces;
+using ColorMine.ColorSpaces.Comparisons;
+using Tesseract;
 
 namespace Penguin
 {
@@ -127,64 +133,50 @@ namespace Penguin
         private void test()
         {
             Stopwatch sw = new Stopwatch();
+            
+            var bmpScreenshot = new Bitmap(358, 25, PixelFormat.Format32bppArgb);
+            int threshold = 20;
+            var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
+            gfxScreenshot.CopyFromScreen(781, 502, 0, 0, new Size(358, 42));
+            var newBmp = new LockBitmap(bmpScreenshot);
+            newBmp.LockBits();
             sw.Start();
-            Color c1 = ScreenGrab.GetPixelColor(1017, 404);
-            Color c2 = ScreenGrab.GetPixelColor(1077, 404);
-            Color c3 = ScreenGrab.GetPixelColor(1024, 425);
-
-            while (CheckBar(c1) != true || CheckBar(c2) != true || CheckBar(c3) != true)
-            {
-                c1 = ScreenGrab.GetPixelColor(1017, 404);
-                c2 = ScreenGrab.GetPixelColor(1077, 404);
-                c3 = ScreenGrab.GetPixelColor(1024, 425);
-                Thread.Sleep(10);
-            }
+            var c1 = newBmp.GetPixel(21, 7);
             sw.Stop();
-            BC.GreenLine("Found it!");
             Console.WriteLine(sw.ElapsedMilliseconds);
-
-            while (!PerfectCatch())
+            var myRgb = new Rgb { R = c1.R, B = c1.B, G = c1.G };
+            for(int x = 0; x < newBmp.Width; x++)
             {
-                Thread.Sleep(10);
+                for (int y = 0; y < newBmp.Height; y++)
+                {
+                    var pix = newBmp.GetPixel(x, y);
+                    var rgb2 = new Rgb { R = pix.R, B = pix.B, G = pix.G };
+                    var deltaE = myRgb.Compare(rgb2, new Cie1976Comparison());
+                    if(deltaE > threshold)
+                    {
+                        newBmp.SetPixel(x, y, Color.White);
+                    }
+                    else
+                    {
+                        newBmp.SetPixel(x, y, Color.Black);
+                    }
+                }
             }
 
-            Console.WriteLine("HIT THE BUTTON!");
-        }
+            newBmp.UnlockBits();
+            
+            newBmp.GetSourceBitmap().Save("e:\\workingonthistoday\\colorcorrected.tif");
+            
 
-        private bool CheckBar(Color c)
-        {
-            if (c.R > 200 && c.G > 200 && c.B > 200)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        private bool PerfectCatch()
-        {
-            Color c1 = ScreenGrab.GetPixelColor(1080, 411);
-            //Color c2 = ScreenGrab.GetPixelColor(1017, 404);
-            //while (CheckCatch(c1) != true || CheckCatch(c2) != true)
-            while (CheckCatch(c1) != true)
-            {
-                c1 = ScreenGrab.GetPixelColor(1080, 411);
-                //c2 = ScreenGrab.GetPixelColor(1017, 404);
-            }
-            return true;
-        }
-        private bool CheckCatch(Color c)
-        {
-            if (c.B > c.R + 30 && c.B > c.G)
-            {
-                return true;
-            }
-            else
-            {
-                Console.WriteLine(c.R + "," + c.G + "," + c.B);
-                return false;
-            }
+            var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
+            engine.SetVariable("tessedit_char_whitelist", "WASD");
+            var page = engine.Process(newBmp.GetSourceBitmap() , PageSegMode.SingleLine);
+            var result = page.GetText();
+            page.Dispose();
+            engine.Dispose();
+            newBmp.GetSourceBitmap().Dispose();
+            Console.WriteLine(result);
+
         }
     }    
 }
