@@ -10,6 +10,12 @@ using Spinnerino;
 using System.Drawing;
 using System.Timers;
 using System.IO;
+using Penguin.ImageProcessing;
+using System.Diagnostics;
+using System.Drawing.Imaging;
+using ColorMine.ColorSpaces.Comparisons;
+using ColorMine.ColorSpaces;
+using Tesseract;
 
 namespace Penguin
 {
@@ -18,6 +24,7 @@ namespace Penguin
         bool running = true;
         Input input = new Input();
         int fishCaught = 0;
+        int minigameBarWaitCount = 0;
         string action = "Waiting to begin";
         System.Timers.Timer t1 = new System.Timers.Timer();
         bool perfectCatch = true;
@@ -144,8 +151,20 @@ namespace Penguin
 
                 input.SendKey(Keys.Space);
 
-                //Start OCR
-
+                //Need to determine if we have a perfect catch or not....
+                //Put in some kind of timer maybe...
+                if(WaitForCatchBar())
+                {
+                    //CatchBarAppeared
+                    //BEGIN OCR ROUTINE HERE
+                    
+                    
+                }
+                else
+                {
+                    //PerfectCatch?
+                    
+                }
                 //Record the fish Catch
                 Console.ForegroundColor = ConsoleColor.Green;
                 action = "Caught!";
@@ -191,6 +210,49 @@ namespace Penguin
 
         }
 
+        private void OCR()
+        {
+            var c1 = ScreenGrab.GetPixelColor(1003, 421);
+            var bmpScreenshot = new Bitmap(332, 20, PixelFormat.Format32bppArgb);
+            int threshold = 20;
+            var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
+            gfxScreenshot.CopyFromScreen(996, 394, 0, 0, bmpScreenshot.Size);
+            var newBmp = new LockBitmap(bmpScreenshot);
+            newBmp.LockBits();
+            var myRgb = new Rgb { R = c1.R, B = c1.B, G = c1.G };
+            for (int x = 0; x < newBmp.Width; x++)
+            {
+                for (int y = 0; y < newBmp.Height; y++)
+                {
+                    var pix = newBmp.GetPixel(x, y);
+                    var rgb2 = new Rgb { R = pix.R, B = pix.B, G = pix.G };
+                    var deltaE = myRgb.Compare(rgb2, new Cie1976Comparison());
+                    if (deltaE > threshold)
+                    {
+                        newBmp.SetPixel(x, y, Color.White);
+                    }
+                    else
+                    {
+                        newBmp.SetPixel(x, y, Color.Black);
+                    }
+                }
+            }
+
+            newBmp.UnlockBits();
+
+            newBmp.GetSourceBitmap().Save("e:\\workingonthistoday\\colorcorrected.tif");
+
+
+            var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
+            engine.SetVariable("tessedit_char_whitelist", "WASD");
+            var page = engine.Process(newBmp.GetSourceBitmap(), PageSegMode.SingleLine);
+            var result = page.GetText();
+            page.Dispose();
+            engine.Dispose();
+            newBmp.GetSourceBitmap().Dispose();
+            Console.WriteLine(result);
+        }
+
         private bool PerfectCatch()
         {
             Color c1 = ScreenGrab.GetPixelColor(1050, 411);
@@ -225,23 +287,29 @@ namespace Penguin
             return true;
         }
 
-        /*Legacy
+        
         private bool WaitForCatchBar()
         {
+            
             Color c1 = ScreenGrab.GetPixelColor(1017, 404);
             Color c2 = ScreenGrab.GetPixelColor(1077, 404);
             Color c3 = ScreenGrab.GetPixelColor(1024, 425);
 
-            while(CheckBar(c1) != true || CheckBar(c2) != true || CheckBar(c3) != true)
+            while (CheckBar(c1) != true || CheckBar(c2) != true || CheckBar(c3) != true)
             {
+                minigameBarWaitCount++;
                 c1 = ScreenGrab.GetPixelColor(1017, 404);
                 c2 = ScreenGrab.GetPixelColor(1077, 404);
                 c3 = ScreenGrab.GetPixelColor(1024, 425);
                 Thread.Sleep(10);
+                if(minigameBarWaitCount > 20)
+                {
+                    return false;
+                }
             }
             return true;
         }
-        */
+
 
         private void Loot()
         {

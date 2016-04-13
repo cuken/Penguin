@@ -141,7 +141,7 @@ namespace Penguin
             var newBmp = new LockBitmap(bmpScreenshot);
             newBmp.LockBits();
             sw.Start();
-            var c1 = newBmp.GetPixel(21, 7);
+            var c1 = newBmp.GetPixel(21,7);
             sw.Stop();
             Console.WriteLine(sw.ElapsedMilliseconds);
             var myRgb = new Rgb { R = c1.R, B = c1.B, G = c1.G };
