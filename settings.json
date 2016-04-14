@@ -1,6 +1,6 @@
 {
 	"general":{
-		"resolution":"1920x1080"
+		"resolution":"1920x1080",
 		"debug":"true"
 	},
 	"catch":{
