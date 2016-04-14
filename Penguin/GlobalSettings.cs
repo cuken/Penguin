@@ -26,6 +26,8 @@ namespace Penguin
         {
             [JsonProperty("resolution")]
             public string resolution;
+            [JsonProperty("debug")]
+            public bool debug;
         }
         [JsonProperty("general")]
         private GeneralSettings _general = new GeneralSettings();

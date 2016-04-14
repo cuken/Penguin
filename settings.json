@@ -1,6 +1,7 @@
 {
 	"general":{
 		"resolution":"1920x1080"
+		"debug":"true"
 	},
 	"catch":{
 		"catchIcon_X": 1065,
@@ -23,7 +24,7 @@
 		"ocrHeight": 19,
 		"ocr_X": 783,
 		"ocr_Y": 354
-	}
+	},
 	"color":{
 		"gray_R": 115,
 		"gray_G": 115,

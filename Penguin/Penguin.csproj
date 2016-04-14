@@ -72,7 +72,6 @@
     <Compile Include="HelperClasses\ScreenGrab.cs" />
     <Compile Include="HelperClasses\Window.cs" />
     <Compile Include="ImageProcessing\ImageProcessing.cs" />
-    <Compile Include="OCR.cs" />
     <Compile Include="Penguin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
