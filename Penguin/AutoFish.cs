@@ -154,14 +154,10 @@ namespace Penguin
                 {
                     //CatchBarAppeared
                     //BEGIN OCR ROUTINE HERE
-                    
-                    
-                }
-                else
-                {
-                    //PerfectCatch?
+                    OCR();
                     
                 }
+
                 //Record the fish Catch
                 Console.ForegroundColor = ConsoleColor.Green;
                 action = "Caught!";
@@ -180,11 +176,14 @@ namespace Penguin
 
         private void OCR()
         {
-            var c1 = ScreenGrab.GetPixelColor(1003, 421);
-            var bmpScreenshot = new Bitmap(332, 20, PixelFormat.Format32bppArgb);
-            int threshold = 20;
+            var c1 = ScreenGrab.GetPixelColor(GlobalSettings.OCR.colorPixel_X, GlobalSettings.OCR.colorPixel_Y);
+            var bmpScreenshot = new Bitmap(GlobalSettings.OCR.ocrWidth, GlobalSettings.OCR.ocrHeight, PixelFormat.Format32bppArgb);
+            
+            //Change threshold by color found
+            int threshold = CompareOCRColor(c1);
+
             var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
-            gfxScreenshot.CopyFromScreen(996, 394, 0, 0, bmpScreenshot.Size);
+            gfxScreenshot.CopyFromScreen(GlobalSettings.OCR.ocr_X, GlobalSettings.OCR.ocr_Y, 0, 0, bmpScreenshot.Size);
             var newBmp = new LockBitmap(bmpScreenshot);
             newBmp.LockBits();
             var myRgb = new Rgb { R = c1.R, B = c1.B, G = c1.G };
@@ -208,8 +207,8 @@ namespace Penguin
 
             newBmp.UnlockBits();
 
-            newBmp.GetSourceBitmap().Save("e:\\workingonthistoday\\colorcorrected.tif");
-
+            if(GlobalSettings.General.debug)
+                newBmp.GetSourceBitmap().Save("e:\\workingonthistoday\\colorcorrected.tif");
 
             var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
             engine.SetVariable("tessedit_char_whitelist", "WASD");
@@ -218,31 +217,98 @@ namespace Penguin
             page.Dispose();
             engine.Dispose();
             newBmp.GetSourceBitmap().Dispose();
-            Console.WriteLine(result);
+
+            foreach(char c in result)
+            {
+                Thread.Sleep(20);
+                switch(c)
+                {
+                    case 'W':
+                        input.SendKey(Keys.W);
+                        break;
+                    case 'A':
+                        input.SendKey(Keys.A);
+                        break;
+                    case 'S':
+                        input.SendKey(Keys.S);
+                        break;
+                    case 'D':
+                        input.SendKey(Keys.D);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
-        private bool PerfectCatch()
+        private int CompareOCRColor(Color c1)
         {
-            Color c1 = ScreenGrab.GetPixelColor(1050, 411);
-            while (CheckCatch(c1) != true)
+            int threshold = 0;
+            var compare = new Rgb { R = c1.R, B = c1.B, G = c1.G };
+            var gray = new Rgb {    R = GlobalSettings.Color.gray_R,    B = GlobalSettings.Color.gray_B,    G = GlobalSettings.Color.gray_G };
+            var teal = new Rgb {    R = GlobalSettings.Color.teal_R,    B = GlobalSettings.Color.teal_B,    G = GlobalSettings.Color.teal_G };
+            var purple = new Rgb {  R = GlobalSettings.Color.purple_R,  B = GlobalSettings.Color.purple_B,  G = GlobalSettings.Color.purple_G };
+            var red = new Rgb {     R = GlobalSettings.Color.red_R,     B = GlobalSettings.Color.red_B,     G = GlobalSettings.Color.red_G };
+            var green = new Rgb {   R = GlobalSettings.Color.green_R,   B = GlobalSettings.Color.green_B,   G = GlobalSettings.Color.green_G };
+            var white = new Rgb {   R = GlobalSettings.Color.white_R,   B = GlobalSettings.Color.white_B,   G = GlobalSettings.Color.white_G };
+                        
+            var dG = compare.Compare(gray,      new Cie1976Comparison());
+            var dT = compare.Compare(teal,      new Cie1976Comparison());
+            var dP = compare.Compare(purple,    new Cie1976Comparison());
+            var dR = compare.Compare(red,       new Cie1976Comparison());
+            var dGr = compare.Compare(green,    new Cie1976Comparison());
+            var dW = compare.Compare(white,     new Cie1976Comparison());
+
+            var deltas = new[] { dG, dT, dP, dR, dGr, dW };
+
+            switch(Array.IndexOf(deltas, deltas.Min()))
             {
-                c1 = ScreenGrab.GetPixelColor(1050, 411);
+                case 0:
+                    threshold = GlobalSettings.Color.gray_Thresh;
+                    break;
+                case 1:
+                    threshold = GlobalSettings.Color.teal_Thresh;
+                    break;
+                case 2:
+                    threshold = GlobalSettings.Color.purple_Thresh;
+                    break;
+                case 3:
+                    threshold = GlobalSettings.Color.red_Thresh;
+                    break;
+                case 4:
+                    threshold = GlobalSettings.Color.green_Thresh;
+                    break;
+                case 5:
+                    threshold = GlobalSettings.Color.white_Thresh;
+                    break;
             }
-            return true;
+
+            return threshold;
+
         }
 
-        private bool RegularCatch()
-        {
-            Color c1 = ScreenGrab.GetPixelColor(1017, 404);
-            while(CheckCatch(c1) != true)
-            {
-                c1 = ScreenGrab.GetPixelColor(1017, 404);
-            }
-            return true;
-        }
+        //private bool PerfectCatch()
+        //{
+        //    Color c1 = ScreenGrab.GetPixelColor(1050, 411);
+        //    while (CheckCatch(c1) != true)
+        //    {
+        //        c1 = ScreenGrab.GetPixelColor(1050, 411);
+        //    }
+        //    return true;
+        //}
+
+        //private bool RegularCatch()
+        //{
+        //    Color c1 = ScreenGrab.GetPixelColor(1017, 404);
+        //    while(CheckCatch(c1) != true)
+        //    {
+        //        c1 = ScreenGrab.GetPixelColor(1017, 404);
+        //    }
+        //    return true;
+        //}
 
         private bool WaitForBite()
-        {            
+        {
             Color c = new Color();
             while (!((c.R < GlobalSettings.Catch.catchIcon_R + GlobalSettings.Catch.catchIcon_Fuzzy) && (c.R > GlobalSettings.Catch.catchIcon_R - GlobalSettings.Catch.catchIcon_Fuzzy)) &&
                    !((c.G < GlobalSettings.Catch.catchIcon_G + GlobalSettings.Catch.catchIcon_Fuzzy) && (c.G > GlobalSettings.Catch.catchIcon_G - GlobalSettings.Catch.catchIcon_Fuzzy)) &&
@@ -255,7 +321,7 @@ namespace Penguin
             return true;
         }
 
-        
+
         private bool WaitForCatchBar()
         {
             

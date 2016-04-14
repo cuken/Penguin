@@ -75,6 +75,10 @@ namespace Penguin
             public int ocrWidth;
             [JsonProperty("ocrHeight")]
             public int ocrHeight;
+            [JsonProperty("ocr_X")]
+            public int ocr_X;
+            [JsonProperty("ocr_Y")]
+            public int ocr_Y;
         }
         [JsonProperty("ocr")]
         private OCRSettings _ocr = new OCRSettings();
@@ -126,6 +130,15 @@ namespace Penguin
             public int green_B;
             [JsonProperty("green_Thresh")]
             public int green_Thresh;
+
+            [JsonProperty("white_R")]
+            public int white_R;
+            [JsonProperty("white_G")]
+            public int white_G;
+            [JsonProperty("white_B")]
+            public int white_B;
+            [JsonProperty("white_Thresh")]
+            public int white_Thresh;
         }
         [JsonProperty("color")]
         private ColorSettings _color = new ColorSettings();

@@ -20,7 +20,9 @@
 		"colorPixel_X": 791,
 		"colorPixel_Y": 357,
 		"ocrWidth": 334,
-		"ocrHeight": 19
+		"ocrHeight": 19,
+		"ocr_X": 783,
+		"ocr_Y": 354
 	}
 	"color":{
 		"gray_R": 115,
