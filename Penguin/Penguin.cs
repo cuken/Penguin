@@ -84,11 +84,7 @@ namespace Penguin
             SC.WriteCenter("Version 0.0.1 Alpha");
             SC.BlankLines(3);
             Console.ForegroundColor = ConsoleColor.Green;
-
-            if (File.Exists("settings.json"))
-                settings = JsonConvert.DeserializeObject<GlobalSettings>(File.ReadAllText("settings.json"));
-            else
-                settings = new GlobalSettings();
+            GlobalSettings.Load();
             Menu();
         }
 
@@ -120,6 +116,9 @@ namespace Penguin
                         case "test":
                             test();
                             break;
+                        case "settings":
+                            Settings();
+                            break;
                         default:
                             break;
                     }
@@ -130,6 +129,17 @@ namespace Penguin
                 }
             }
         }
+
+        private void Settings()
+        {
+            Console.WriteLine(GlobalSettings.General.resolution);
+            Console.WriteLine(GlobalSettings.Catch.catchIcon_X);
+            Console.WriteLine(GlobalSettings.Catch.catchIcon_Y);
+            Console.WriteLine(GlobalSettings.Catch.catchIcon_R);
+            Console.WriteLine(GlobalSettings.Catch.catchIcon_G);
+            Console.WriteLine(GlobalSettings.Catch.catchIcon_B);
+        }
+
         private void test()
         {
             Stopwatch sw = new Stopwatch();

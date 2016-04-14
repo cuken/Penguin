@@ -121,8 +121,6 @@ namespace Penguin
                       
             while(running)
             {
-
-
                 //Cast the Fishing Line;
 
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -142,11 +140,10 @@ namespace Penguin
 
                 //Bite Detected, hit Space to start catch
                 input.SendKey(Keys.Space);
-
-                //Wait for Catch minigame bar to appear
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 action = "Catching";
 
+                //Trying for perfect catch!
                 Thread.Sleep(1550);
 
                 input.SendKey(Keys.Space);
@@ -171,41 +168,12 @@ namespace Penguin
                 fishCaught++;
 
                 //Wait for the loot dialog to come up
-                Thread.Sleep(GlobalSettings.lootDealy);
+                Thread.Sleep(GlobalSettings.Timer.lootDelay);
                 action = "Looting";
                 Loot();
 
                 //Wait to recast
                 Thread.Sleep(1000);
-
-
-                //while(!WaitForCatchBar())
-                //{
-                //    Thread.Sleep(10);
-                //}
-
-                //Bar Found!
-                //Conditional logic of perfect catch versus non?
-
-                //if(perfectCatch)
-                //{
-                //    //Attempt to catch the fish "perfectly"
-                //    while (!PerfectCatch())
-                //    {
-                //        Thread.Sleep(10);
-                //    }
-                //}
-                //else
-                //{
-                //    //Catch the fish in the blue, play fish minigame
-                //    while (!RegularCatch())
-                //    {
-                //        Thread.Sleep(10);
-                //    }
-                //}
-                //input.SendKey(Keys.Space);
-
-
             }
 
         }
@@ -276,9 +244,9 @@ namespace Penguin
         private bool WaitForBite()
         {            
             Color c = new Color();
-            while (!((c.R < GlobalSettings.catchIcon_R + GlobalSettings.catchIcon_Fuzzy) && (c.R > GlobalSettings.catchIcon_R - GlobalSettings.catchIcon_Fuzzy)) &&
-                   !((c.G < GlobalSettings.catchIcon_G + GlobalSettings.catchIcon_Fuzzy) && (c.G > GlobalSettings.catchIcon_G - GlobalSettings.catchIcon_Fuzzy)) &&
-                   !((c.B < GlobalSettings.catchIcon_B + GlobalSettings.catchIcon_Fuzzy) && (c.B > GlobalSettings.catchIcon_B - GlobalSettings.catchIcon_Fuzzy)))
+            while (!((c.R < GlobalSettings.Catch.catchIcon_R + GlobalSettings.Catch.catchIcon_Fuzzy) && (c.R > GlobalSettings.Catch.catchIcon_R - GlobalSettings.Catch.catchIcon_Fuzzy)) &&
+                   !((c.G < GlobalSettings.Catch.catchIcon_G + GlobalSettings.Catch.catchIcon_Fuzzy) && (c.G > GlobalSettings.Catch.catchIcon_G - GlobalSettings.Catch.catchIcon_Fuzzy)) &&
+                   !((c.B < GlobalSettings.Catch.catchIcon_B + GlobalSettings.Catch.catchIcon_Fuzzy) && (c.B > GlobalSettings.Catch.catchIcon_B - GlobalSettings.Catch.catchIcon_Fuzzy)))
             {
                 c = ScreenGrab.GetPixelColor(catchIconX, catchIconY);
                 //action = $"Expecting:{catchIconR},{catchIconG},{catchIconB} Returning:{c.R},{c.G},{c.B}";
