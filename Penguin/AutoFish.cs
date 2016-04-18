@@ -26,8 +26,8 @@ namespace Penguin
         int fishCaught = 0;
         int minigameBarWaitCount = 0;
         string action = "Waiting to begin";
+        bool ocrFound = false;
         System.Timers.Timer t1 = new System.Timers.Timer();
-        bool perfectCatch = true;
 
         #region FishingVariables
         int catchLeeway = 2;
@@ -40,7 +40,21 @@ namespace Penguin
 
         int catchTime = 600;
 
-                
+
+        #endregion
+
+        #region COLORS
+
+        Rgb gray = new Rgb { R = GlobalSettings.Color.gray_R, B = GlobalSettings.Color.gray_B, G = GlobalSettings.Color.gray_G };
+        Rgb teal = new Rgb { R = GlobalSettings.Color.teal_R, B = GlobalSettings.Color.teal_B, G = GlobalSettings.Color.teal_G };
+        Rgb blue = new Rgb { R = GlobalSettings.Color.blue_R, B = GlobalSettings.Color.blue_B, G = GlobalSettings.Color.blue_G };
+        Rgb orange = new Rgb { R = GlobalSettings.Color.orange_R, B = GlobalSettings.Color.orange_B, G = GlobalSettings.Color.orange_G };
+        Rgb purple = new Rgb { R = GlobalSettings.Color.purple_R, B = GlobalSettings.Color.purple_B, G = GlobalSettings.Color.purple_G };
+        Rgb red = new Rgb { R = GlobalSettings.Color.red_R, B = GlobalSettings.Color.red_B, G = GlobalSettings.Color.red_G };
+        Rgb green = new Rgb { R = GlobalSettings.Color.green_R, B = GlobalSettings.Color.green_B, G = GlobalSettings.Color.green_G };
+        Rgb yellow = new Rgb { R = GlobalSettings.Color.yellow_R, B = GlobalSettings.Color.yellow_B, G = GlobalSettings.Color.yellow_G };
+        Rgb white = new Rgb { R = GlobalSettings.Color.white_R, B = GlobalSettings.Color.white_B, G = GlobalSettings.Color.white_G };
+
         #endregion
 
 
@@ -54,6 +68,7 @@ namespace Penguin
 
             //Loading Keyboard Driver and detecting input for Device ID;
             Load();
+
 
             Console.ForegroundColor = ConsoleColor.Green;
             string response = Console.ReadLine();            
@@ -88,7 +103,6 @@ namespace Penguin
                 BC.CyanLine(Ascii.Banner());
             }
         }
-
         private void StartBar()
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -131,7 +145,7 @@ namespace Penguin
                 //Wait for the fish to bite
                 Console.ForegroundColor = ConsoleColor.Gray;
                 action = "Waiting for bite";
-                Thread.Sleep(15000);
+                Thread.Sleep(5000);
 
                 while(!WaitForBite())
                 {
@@ -142,22 +156,15 @@ namespace Penguin
                 input.SendKey(Keys.Space);
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 action = "Catching";
-
-                //Trying for perfect catch!
-                Thread.Sleep(1550);
+                
+                Thread.Sleep(GlobalSettings.Timer.catchDelay);
 
                 input.SendKey(Keys.Space);
 
-                //Need to determine if we have a perfect catch or not....
-                //Put in some kind of timer maybe...
-                if(WaitForCatchBar())
-                {
-                    //CatchBarAppeared
-                    //BEGIN OCR ROUTINE HERE
-                    OCR();
-                    
-                }
-
+                Thread.Sleep(2500);               
+                FindOCRWindow();
+                
+                
                 //Record the fish Catch
                 Console.ForegroundColor = ConsoleColor.Green;
                 action = "Caught!";
@@ -174,16 +181,82 @@ namespace Penguin
 
         }
 
-        private void OCR()
+        private void FindOCRWindow()
         {
-            var c1 = ScreenGrab.GetPixelColor(GlobalSettings.OCR.colorPixel_X, GlobalSettings.OCR.colorPixel_Y);
+            int t_X = 0;
+            int t_Y = 0;
+            int combo = 0;
+            int maxCombo = 0;
+            var screenshot = new Bitmap(40, 33, PixelFormat.Format32bppArgb);
+            var gfx = Graphics.FromImage(screenshot);
+            gfx.CopyFromScreen(688, 316, 0, 0, screenshot.Size);
+            if (GlobalSettings.General.debug)
+                screenshot.Save(GlobalSettings.General.debugDir + fishCaught + "-DetectOCR.png");
+            var newBmp = new LockBitmap(screenshot);
+            newBmp.LockBits();
+
+            //11 Pixels across > 700 combined rgb
+
+            for (int y = 0; y < newBmp.Height && !ocrFound; y++)
+            {
+                action = "Searching for OCR box!";
+                
+                for (int x = 0; x < newBmp.Width && !ocrFound; x++)
+                {
+                    var pxl = newBmp.GetPixel(x, y);
+                    if (pxl.R + pxl.G + pxl.B >= 700)
+                    {
+                        maxCombo = maxCombo < combo ? combo : maxCombo;
+                        if (++combo > 10)
+                        {
+                            //We found our T?
+                            t_X = x;
+                            t_Y = y;
+                            ocrFound = true;
+                            action = "OCR BOX FOUND!";
+                        }
+                    }
+                    else
+                    {
+                        combo = 0;
+                    }
+                }
+                
+                Debug.WriteLine($"MaxCombo for {y}: {maxCombo}");
+                maxCombo = 0;
+            }
+
+            if (ocrFound)
+            {
+                Debug.WriteLine($"X:{t_X},Y:{t_Y}");
+                OCR(t_X + 82 + 688, t_Y + 34 + 316);
+                newBmp.UnlockBits();
+                newBmp.GetSourceBitmap().Dispose();
+                screenshot.Dispose();
+                gfx.Dispose();
+            }
+            else
+            {
+                action = "OCR BOX NOT FOUN!>!@>?#!?@#";
+            }
+
+            ocrFound = false;
+            
+        }
+
+        private void OCR(int startX, int startY)
+        {
+            var c1 = ScreenGrab.GetPixelColor(startX+9, startY+3);
             var bmpScreenshot = new Bitmap(GlobalSettings.OCR.ocrWidth, GlobalSettings.OCR.ocrHeight, PixelFormat.Format32bppArgb);
             
             //Change threshold by color found
             int threshold = CompareOCRColor(c1);
 
             var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
-            gfxScreenshot.CopyFromScreen(GlobalSettings.OCR.ocr_X, GlobalSettings.OCR.ocr_Y, 0, 0, bmpScreenshot.Size);
+            gfxScreenshot.CopyFromScreen(startX, startY, 0, 0, bmpScreenshot.Size);
+            if (GlobalSettings.General.debug)
+                bmpScreenshot.Save(GlobalSettings.General.debugDir + fishCaught + "-Original.png");
+            
             var newBmp = new LockBitmap(bmpScreenshot);
             newBmp.LockBits();
             var myRgb = new Rgb { R = c1.R, B = c1.B, G = c1.G };
@@ -207,20 +280,25 @@ namespace Penguin
 
             newBmp.UnlockBits();
 
-            if(GlobalSettings.General.debug)
-                newBmp.GetSourceBitmap().Save("e:\\workingonthistoday\\colorcorrected.tif");
-
             var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
             engine.SetVariable("tessedit_char_whitelist", "WASD");
             var page = engine.Process(newBmp.GetSourceBitmap(), PageSegMode.SingleLine);
             var result = page.GetText();
             page.Dispose();
             engine.Dispose();
-            newBmp.GetSourceBitmap().Dispose();
 
-            foreach(char c in result)
+            if (GlobalSettings.General.debug)
             {
-                Thread.Sleep(20);
+                newBmp.GetSourceBitmap().Save(GlobalSettings.General.debugDir + fishCaught + "- Colorcorrected.png");
+                Console.WriteLine("\n\n" + result);
+
+            }
+
+            newBmp.GetSourceBitmap().Dispose();
+            Random r = new Random(991988);
+            foreach (char c in result)
+            {
+                Thread.Sleep(20 + r.Next(30));
                 switch(c)
                 {
                     case 'W':
@@ -245,12 +323,7 @@ namespace Penguin
         {
             int threshold = 0;
             var compare = new Rgb { R = c1.R, B = c1.B, G = c1.G };
-            var gray = new Rgb {    R = GlobalSettings.Color.gray_R,    B = GlobalSettings.Color.gray_B,    G = GlobalSettings.Color.gray_G };
-            var teal = new Rgb {    R = GlobalSettings.Color.teal_R,    B = GlobalSettings.Color.teal_B,    G = GlobalSettings.Color.teal_G };
-            var purple = new Rgb {  R = GlobalSettings.Color.purple_R,  B = GlobalSettings.Color.purple_B,  G = GlobalSettings.Color.purple_G };
-            var red = new Rgb {     R = GlobalSettings.Color.red_R,     B = GlobalSettings.Color.red_B,     G = GlobalSettings.Color.red_G };
-            var green = new Rgb {   R = GlobalSettings.Color.green_R,   B = GlobalSettings.Color.green_B,   G = GlobalSettings.Color.green_G };
-            var white = new Rgb {   R = GlobalSettings.Color.white_R,   B = GlobalSettings.Color.white_B,   G = GlobalSettings.Color.white_G };
+            
                         
             var dG = compare.Compare(gray,      new Cie1976Comparison());
             var dT = compare.Compare(teal,      new Cie1976Comparison());
@@ -282,30 +355,8 @@ namespace Penguin
                     threshold = GlobalSettings.Color.white_Thresh;
                     break;
             }
-
             return threshold;
-
         }
-
-        //private bool PerfectCatch()
-        //{
-        //    Color c1 = ScreenGrab.GetPixelColor(1050, 411);
-        //    while (CheckCatch(c1) != true)
-        //    {
-        //        c1 = ScreenGrab.GetPixelColor(1050, 411);
-        //    }
-        //    return true;
-        //}
-
-        //private bool RegularCatch()
-        //{
-        //    Color c1 = ScreenGrab.GetPixelColor(1017, 404);
-        //    while(CheckCatch(c1) != true)
-        //    {
-        //        c1 = ScreenGrab.GetPixelColor(1017, 404);
-        //    }
-        //    return true;
-        //}
 
         private bool WaitForBite()
         {
@@ -395,25 +446,6 @@ namespace Penguin
 
         //    return result;
         //}
-
-        private void Test()
-        {
-            Console.WriteLine("send input to deduce keyboard id");
-            Console.ReadLine();
-
-            //WindowsAPI.SwitchWindow(WindowHandle);
-            WindowHelper.SwitchWindow("notepad");
-            Thread.Sleep(2500);
-
-            input.KeyPressDelay = 10;
-            input.SendKey(Keys.Enter);
-            Thread.Sleep(500);
-            input.SendText("");
-            Thread.Sleep(500);
-            input.SendKey(Keys.Enter);
-            //input.SendKeys(Keys.Space);
-
-        }
 
         private void Load()
         {

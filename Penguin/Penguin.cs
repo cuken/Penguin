@@ -1,20 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Spinnerino;
 using Penguin.HelperClasses;
-using System.Drawing;
-using Newtonsoft.Json;
-using System.Drawing.Imaging;
-using ColorMine;
-using Penguin.ImageProcessing;
-using ColorMine.ColorSpaces;
-using ColorMine.ColorSpaces.Comparisons;
-using Tesseract;
+using System.Windows.Forms;
+using Rhino.Licensing;
 
 namespace Penguin
 {
@@ -22,8 +12,7 @@ namespace Penguin
     {
         public static Penguin p;
         public static GlobalSettings settings;
-        AutoFish fish = new AutoFish();
-        
+        AutoFish fish = new AutoFish();        
 
         static bool exitSystem = false;
 
@@ -83,8 +72,39 @@ namespace Penguin
             SC.BlankLines(1);
             SC.WriteCenter("Version 0.0.1 Alpha");
             SC.BlankLines(3);
+            try
+            {
+                GlobalSettings.Load();
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Unable to locate settings file in {Environment.CurrentDirectory}\\config - Please make sure you have a settings.json file present!");
+                Console.ReadKey();
+                Environment.Exit(99);
+            }
+            try
+            {
+                var publicKey = File.ReadAllText(@".\config\publicKey.xml");
+                new LicenseValidator(publicKey, @".\config\license.xml")
+                .AssertValidLicense();
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"You do not have a valid license file in {Environment.CurrentDirectory}\\config - Please make sure you have both your public key and license.xml file present!");
+                Console.ReadKey();
+                Environment.Exit(20);
+            }
+            if(!File.Exists(@"c:\windows\system32\drivers\keyboard.sys"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Unable to find low level keyboard driver on this machine. Please reinstall the driver from the Penguin directory using an administrative account!");
+                Console.ReadKey();
+                Environment.Exit(10);
+            }
+
             Console.ForegroundColor = ConsoleColor.Green;
-            GlobalSettings.Load();
             Menu();
         }
 
@@ -142,50 +162,11 @@ namespace Penguin
 
         private void test()
         {
-            Stopwatch sw = new Stopwatch();
-            
-            var bmpScreenshot = new Bitmap(358, 25, PixelFormat.Format32bppArgb);
-            int threshold = 20;
-            var gfxScreenshot = Graphics.FromImage(bmpScreenshot);
-            gfxScreenshot.CopyFromScreen(781, 502, 0, 0, new Size(358, 42));
-            var newBmp = new LockBitmap(bmpScreenshot);
-            newBmp.LockBits();
-            sw.Start();
-            var c1 = newBmp.GetPixel(21,7);
-            sw.Stop();
-            Console.WriteLine(sw.ElapsedMilliseconds);
-            var myRgb = new Rgb { R = c1.R, B = c1.B, G = c1.G };
-            for(int x = 0; x < newBmp.Width; x++)
+            while (true)
             {
-                for (int y = 0; y < newBmp.Height; y++)
-                {
-                    var pix = newBmp.GetPixel(x, y);
-                    var rgb2 = new Rgb { R = pix.R, B = pix.B, G = pix.G };
-                    var deltaE = myRgb.Compare(rgb2, new Cie1976Comparison());
-                    if(deltaE > threshold)
-                    {
-                        newBmp.SetPixel(x, y, Color.White);
-                    }
-                    else
-                    {
-                        newBmp.SetPixel(x, y, Color.Black);
-                    }
-                }
+                Console.WriteLine($"{Cursor.Position.X},{Cursor.Position.Y}");
+                Thread.Sleep(20);
             }
-
-            newBmp.UnlockBits();
-            
-            newBmp.GetSourceBitmap().Save("e:\\workingonthistoday\\colorcorrected.tif");
-            
-
-            var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
-            engine.SetVariable("tessedit_char_whitelist", "WASD");
-            var page = engine.Process(newBmp.GetSourceBitmap() , PageSegMode.SingleLine);
-            var result = page.GetText();
-            page.Dispose();
-            engine.Dispose();
-            newBmp.GetSourceBitmap().Dispose();
-            Console.WriteLine(result);
 
         }
     }    

@@ -28,6 +28,8 @@ namespace Penguin
             public string resolution;
             [JsonProperty("debug")]
             public bool debug;
+            [JsonProperty("debugDir")]
+            public string debugDir;
         }
         [JsonProperty("general")]
         private GeneralSettings _general = new GeneralSettings();
@@ -124,6 +126,24 @@ namespace Penguin
             [JsonProperty("red_Thresh")]
             public int red_Thresh;
 
+            [JsonProperty("blue_R")]
+            public int blue_R;
+            [JsonProperty("blue_G")]
+            public int blue_G;
+            [JsonProperty("blue_B")]
+            public int blue_B;
+            [JsonProperty("blue_Thresh")]
+            public int blue_Thresh;
+
+            [JsonProperty("orange_R")]
+            public int orange_R;
+            [JsonProperty("orange_G")]
+            public int orange_G;
+            [JsonProperty("orange_B")]
+            public int orange_B;
+            [JsonProperty("orange_Thresh")]
+            public int orange_Thresh;
+
             [JsonProperty("green_R")]
             public int green_R;
             [JsonProperty("green_G")]
@@ -132,6 +152,15 @@ namespace Penguin
             public int green_B;
             [JsonProperty("green_Thresh")]
             public int green_Thresh;
+
+            [JsonProperty("yellow_R")]
+            public int yellow_R;
+            [JsonProperty("yellow_G")]
+            public int yellow_G;
+            [JsonProperty("yellow_B")]
+            public int yellow_B;
+            [JsonProperty("yellow_Thresh")]
+            public int yellow_Thresh;
 
             [JsonProperty("white_R")]
             public int white_R;
