@@ -3,8 +3,9 @@ using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
 using Penguin.HelperClasses;
-using System.Windows.Forms;
 using Rhino.Licensing;
+using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Penguin
 {
@@ -12,8 +13,7 @@ namespace Penguin
     {
         public static Penguin p;
         public static GlobalSettings settings;
-        AutoFish fish = new AutoFish();        
-
+        AutoFish fish = new AutoFish();   
         static bool exitSystem = false;
 
         #region Trap application termination
@@ -50,7 +50,6 @@ namespace Penguin
             return true;
         }
         #endregion
-
         static void Main(string[] args)
         {
             _handler += new EventHandler(Handler);
@@ -66,15 +65,34 @@ namespace Penguin
 
         private void Start()
         {
-            Console.Title = "Penguin - 0.0.1";
+            Console.Title = $"Penguin - {Application.ProductVersion}";
             BC.CyanLine(Ascii.Banner());
             Console.ForegroundColor = ConsoleColor.Gray;
             SC.BlankLines(1);
-            SC.WriteCenter("Version 0.0.1 Alpha");
+            SC.WriteCenter($"Version {Application.ProductVersion} - Alpha");
             SC.BlankLines(3);
             try
             {
+                if(Update.Update.CheckVersion())
+                {
+                    Console.Write("A new version of Penguin is available, would you like to update now? (y/n): ");
+                    string response = Console.ReadLine();
+                    if (response.ToLower() == "y") 
+                    {
+                        Update.Update.DownloadUpdate();
+                        Update.Update.InstallUpdate();                        
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.Message);
+            }
+
+            try
+            {
                 GlobalSettings.Load();
+
             }
             catch
             {
@@ -133,12 +151,6 @@ namespace Penguin
                         case "begin":
                             fish.Start();
                             break;
-                        case "test":
-                            test();
-                            break;
-                        case "settings":
-                            Settings();
-                            break;
                         default:
                             break;
                     }
@@ -148,26 +160,6 @@ namespace Penguin
                     BC.RedLine(ex.Message);
                 }
             }
-        }
-
-        private void Settings()
-        {
-            Console.WriteLine(GlobalSettings.General.resolution);
-            Console.WriteLine(GlobalSettings.Catch.catchIcon_X);
-            Console.WriteLine(GlobalSettings.Catch.catchIcon_Y);
-            Console.WriteLine(GlobalSettings.Catch.catchIcon_R);
-            Console.WriteLine(GlobalSettings.Catch.catchIcon_G);
-            Console.WriteLine(GlobalSettings.Catch.catchIcon_B);
-        }
-
-        private void test()
-        {
-            while (true)
-            {
-                Console.WriteLine($"{Cursor.Position.X},{Cursor.Position.Y}");
-                Thread.Sleep(20);
-            }
-
         }
     }    
 }

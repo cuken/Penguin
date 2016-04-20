@@ -27,22 +27,7 @@ namespace Penguin
         int minigameBarWaitCount = 0;
         string action = "Waiting to begin";
         bool ocrFound = false;
-        System.Timers.Timer t1 = new System.Timers.Timer();
-
-        #region FishingVariables
-        int catchLeeway = 2;
-
-        int catchIconX = 1065;
-        int catchIconY = 94;
-        int catchIconR = 240;
-        int catchIconG = 214;
-        int catchIconB = 104;
-
-        int catchTime = 600;
-
-
-        #endregion
-
+        System.Timers.Timer t1 = new System.Timers.Timer();        
         #region COLORS
 
         Rgb gray = new Rgb { R = GlobalSettings.Color.gray_R, B = GlobalSettings.Color.gray_B, G = GlobalSettings.Color.gray_G };
@@ -365,7 +350,7 @@ namespace Penguin
                    !((c.G < GlobalSettings.Catch.catchIcon_G + GlobalSettings.Catch.catchIcon_Fuzzy) && (c.G > GlobalSettings.Catch.catchIcon_G - GlobalSettings.Catch.catchIcon_Fuzzy)) &&
                    !((c.B < GlobalSettings.Catch.catchIcon_B + GlobalSettings.Catch.catchIcon_Fuzzy) && (c.B > GlobalSettings.Catch.catchIcon_B - GlobalSettings.Catch.catchIcon_Fuzzy)))
             {
-                c = ScreenGrab.GetPixelColor(catchIconX, catchIconY);
+                c = ScreenGrab.GetPixelColor(GlobalSettings.Catch.catchIcon_X, GlobalSettings.Catch.catchIcon_Y);
                 //action = $"Expecting:{catchIconR},{catchIconG},{catchIconB} Returning:{c.R},{c.G},{c.B}";
                 Thread.Sleep(50);
             }
