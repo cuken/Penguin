@@ -16,6 +16,7 @@ using System.Drawing.Imaging;
 using ColorMine.ColorSpaces.Comparisons;
 using ColorMine.ColorSpaces;
 using Tesseract;
+using System.Windows.Forms;
 
 namespace Penguin
 {
@@ -27,7 +28,8 @@ namespace Penguin
         int minigameBarWaitCount = 0;
         string action = "Waiting to begin";
         bool ocrFound = false;
-        System.Timers.Timer t1 = new System.Timers.Timer();        
+        System.Timers.Timer t1 = new System.Timers.Timer();
+        List<Point> fishingPoints = new List<Point>();
         #region COLORS
 
         Rgb gray = new Rgb { R = GlobalSettings.Color.gray_R, B = GlobalSettings.Color.gray_B, G = GlobalSettings.Color.gray_G };
@@ -43,17 +45,44 @@ namespace Penguin
         #endregion
 
 
+
+        private void HotKeyManager_HotKeyPressed(object sender, HotKeyEventArgs e)
+        {
+            Console.WriteLine(Cursor.Position.X.ToString(), Cursor.Position.Y.ToString());
+            fishingPoints.Add(new Point(Cursor.Position.X, Cursor.Position.Y));
+        }
+
         public void Start()
         {
             Console.Clear();
+            try
+            {
+                string path = @"e:\tessdata";
+                Console.WriteLine(path);
+                var engine = new TesseractEngine(path, "eng", EngineMode.Default);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.InnerException);
+            }
             BC.CyanLine(Ascii.Banner());
             SC.BlankLines(2);
             Console.ForegroundColor = ConsoleColor.Red;
+            BC.WhiteLine("If you would like to use Pole switching, we'll need to store variables for the x,y coordinates of the pole in your inventory.");
+            BC.CyanLine("Would you like to setup fishing poles now? (y/n)");
+            string resp = Console.ReadLine();
+            if (resp.ToLower() == "y")
+            {
+                HotKeyManager.RegisterHotKey(System.Windows.Forms.Keys.F3, KeyModifiers.NoRepeat);
+                HotKeyManager.HotKeyPressed += HotKeyManager_HotKeyPressed;
+                BC.YellowLine("Return to BDO and hit the \"F3\" key while hovering over a fishing pole in your inventory. You may do this as many times as you want. Press any key when you are done.");
+                Console.ReadKey();
+                HotKeyManager.UnregisterHotKey(1);
+            }
             SC.WriteCenter("Penguin is *NOT* responsible for any actions taken against your account. Please type \"c\" if you accept this risk...");
-
+            
             //Loading Keyboard Driver and detecting input for Device ID;
             Load();
-
 
             Console.ForegroundColor = ConsoleColor.Green;
             string response = Console.ReadLine();            
@@ -114,7 +143,7 @@ namespace Penguin
 
             */
 
-            WindowHelper.SwitchWindow("BlackDesert64");
+            WindowHelper.SwitchWindow("BlackDesert65");
             Thread.Sleep(100);
 
                       
@@ -124,7 +153,7 @@ namespace Penguin
 
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 action = "Casting";
-                input.SendKey(Keys.Space);
+                input.SendKey(Interceptor.Keys.Space);
                 Thread.Sleep(2500);
 
                 //Wait for the fish to bite
@@ -138,13 +167,13 @@ namespace Penguin
                 }
 
                 //Bite Detected, hit Space to start catch
-                input.SendKey(Keys.Space);
+                input.SendKey(Interceptor.Keys.Space);
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 action = "Catching";
                 
                 Thread.Sleep(GlobalSettings.Timer.catchDelay);
 
-                input.SendKey(Keys.Space);
+                input.SendKey(Interceptor.Keys.Space);
 
                 Thread.Sleep(2500);               
                 FindOCRWindow();
@@ -222,7 +251,7 @@ namespace Penguin
             }
             else
             {
-                action = "OCR BOX NOT FOUN!>!@>?#!?@#";
+                action = "OCR BOX NOT FOUND!>!@>?#!?@#";
             }
 
             ocrFound = false;
@@ -287,16 +316,16 @@ namespace Penguin
                 switch(c)
                 {
                     case 'W':
-                        input.SendKey(Keys.W);
+                        input.SendKey(Interceptor.Keys.W);
                         break;
                     case 'A':
-                        input.SendKey(Keys.A);
+                        input.SendKey(Interceptor.Keys.A);
                         break;
                     case 'S':
-                        input.SendKey(Keys.S);
+                        input.SendKey(Interceptor.Keys.S);
                         break;
                     case 'D':
-                        input.SendKey(Keys.D);
+                        input.SendKey(Interceptor.Keys.D);
                         break;
                     default:
                         break;
@@ -384,7 +413,7 @@ namespace Penguin
         private void Loot()
         {
             //Add in logic later to determine the quality of the catch. For now, loot everything.
-            input.SendKey(Keys.R);
+            input.SendKey(Interceptor.Keys.R);
         }
 
         private bool CheckBar(Color c)

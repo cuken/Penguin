@@ -1,0 +1,67 @@
+{
+	"general":{
+		"resolution":"1920x1080",
+		"debug":"true",
+		"debugDir":"F:\\WD\\"
+	}, 
+	"catch":{
+		"catchIcon_X": 1065,
+		"catchIcon_Y": 94,
+		"catchIcon_R": 240,
+		"catchIcon_G": 214,
+		"catchIcon_B": 104,
+		"catchIcon_Fuzzy": 2 
+	},
+	"timer":{
+		"biteToCatchTimer": 2,
+		"lootDelay": 5000,
+		"catchDelay":  1600,
+		"waitForCatchIdle": 3000 
+	},
+	"ocr":{
+		"colorPixel_X": 783,
+		"colorPixel_Y": 359,
+		"ocrWidth": 335,
+		"ocrHeight": 19,
+		"ocr_X": 780,
+		"ocr_Y": 356
+	},
+	"color":{
+		"gray_R": 115,
+		"gray_G": 115,
+		"gray_B": 113,
+		"gray_Thresh": 17,
+		"teal_R": 92,
+		"teal_G": 162,
+		"teal_B": 172,
+		"teal_Thresh": 20,
+		"blue_R":57,
+		"blue_G":106,
+		"blue_B":119,
+		"blue_Thresh": 20,
+		"orange_R": 158,
+		"orange_G": 108,
+		"orange_B": 82,
+		"orange_Thresh": 20,
+		"purple_R": 79,
+		"purple_G": 29,
+		"purple_B": 116,
+		"purple_Thresh": 20,
+		"red_R": 0,
+		"red_G": 0,
+		"red_B": 0,
+		"red_Thresh": 0,
+		"green_R": 0,
+		"green_G": 0,
+		"green_B": 0,
+		"green_Thresh": 0,
+		"yellow_R": 183,
+		"yellow_G": 185,
+		"yellow_B": 136,
+		"yellow_Thresh": 20,
+		"white_R": 255,
+		"white_G": 255,
+		"white_B": 255,
+		"white_Thresh": 10 
+	}
+}

@@ -6,6 +6,8 @@ using Penguin.HelperClasses;
 using Rhino.Licensing;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Drawing;
+using System.Collections.Generic;
 
 namespace Penguin
 {
@@ -50,6 +52,7 @@ namespace Penguin
             return true;
         }
         #endregion
+
         static void Main(string[] args)
         {
             _handler += new EventHandler(Handler);
@@ -114,7 +117,15 @@ namespace Penguin
                 Console.ReadKey();
                 Environment.Exit(20);
             }
-            if(!File.Exists(@"c:\windows\system32\drivers\keyboard.sys"))
+            try
+            {
+                File.Exists(@"C:\Windows\System32\drivers\keyboard.sys");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.InnerException);
+            }
+            if (!File.Exists(@"C:\Windows\System32\drivers\keyboard.sys"))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Unable to find low level keyboard driver on this machine. Please reinstall the driver from the Penguin directory using an administrative account!");

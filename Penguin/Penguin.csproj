@@ -60,6 +60,10 @@
       <HintPath>..\packages\CommonMark.NET.0.9.1\lib\net45\CommonMark.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="GlobalHotKey, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GlobalHotKey.1.1.0\lib\GlobalHotKey.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Interceptor">
       <HintPath>..\Interceptor.dll</HintPath>
     </Reference>
@@ -101,6 +105,7 @@
     <Compile Include="AutoFish.cs" />
     <Compile Include="GlobalSettings.cs" />
     <Compile Include="HelperClasses\Ascii.cs" />
+    <Compile Include="HelperClasses\HotKeyManager.cs" />
     <Compile Include="HelperClasses\PrettyConsole.cs" />
     <Compile Include="HelperClasses\ScreenGrab.cs" />
     <Compile Include="HelperClasses\Window.cs" />
@@ -111,6 +116,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="config\settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="tessdata\eng.cube.bigrams">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -141,8 +149,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="config\publicKey.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="fishingshop.ico" />
-    <Content Include="FodyWeavers.xml" />
+    <Content Include="FodyWeavers.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="interception.dll" />
     <Content Include="penguin.ico" />
     <Content Include="x64\liblept172.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
